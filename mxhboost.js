@@ -4,7 +4,8 @@ const path = require('path')
 const rl = require('readline-sync')
 const SteamUser = require('steam-user')
 
-const idleList = require('./idleList')
+const idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(","))
+console.log(idleList)
 
 if (idleList.length < 1) {
 	console.log('No games selected')
@@ -14,10 +15,13 @@ if (idleList.length < 1) {
 const client = new SteamUser()
 
 const logOnDetails = {
-	//'accountName': '',
-	'dontRememberMachine': false
+	'accountName': process.env.STEAM_LOGIN,
+	'password': process.env.STEAM_PASSWORD,
+	'twoFactorCode': process.env.STEAM_2FA,
+	'dontRememberMachine': true
 }
 
+/*
 const composeLoginKeyPath = () => path.join(client.options.dataDirectory, `loginKey.${logOnDetails.accountName}.txt`)
 
 logOnDetails['accountName'] = logOnDetails['accountName'] || rl.question('Steam Account Name: ', {
@@ -40,6 +44,7 @@ if (fileExists.sync(composeLoginKeyPath())) {
 }
 
 client.on('loginKey', key => fs.writeFileSync(composeLoginKeyPath(), key, 'utf8'))
+*/
 
 client.on('loggedOn', details => {
 	client.getNicknames(() => {
