@@ -23,17 +23,8 @@ else {
 bot.on('loggedOn', function () {
 	console.log('[STEAM] Logged in.');
 	bot.setPersonaState(Steam.EPersonaState.Online);
-	//Tell steam we are playing games.
-	//730=csgo
-	//2350=quake3
-	//753=steam
-	//440=tf2
-	//240=css
-	//220-HalfLife2
-	//10-cs
-	//80=cscz
-	//570=dota2
-	bot.gamesPlayed([2350, 753, 550, 730, 570, 240, 220, 10, 80, 440]);
+
+	bot.gamesPlayed([process.env.STEAM_GAMEIDS.split(",")]);
 });
 
 bot.on('sentry', function (sentryHash) {//A sentry file is a file that is sent once you have
