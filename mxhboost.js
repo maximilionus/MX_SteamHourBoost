@@ -21,31 +21,6 @@ const logOnDetails = {
 	'dontRememberMachine': true
 }
 
-/*
-const composeLoginKeyPath = () => path.join(client.options.dataDirectory, `loginKey.${logOnDetails.accountName}.txt`)
-
-logOnDetails['accountName'] = logOnDetails['accountName'] || rl.question('Steam Account Name: ', {
-	limit: name => name.length > 0
-})
-
-if (fileExists.sync(composeLoginKeyPath())) {
-	logOnDetails['loginKey'] = fs.readFileSync(composeLoginKeyPath(), 'utf8')
-	logOnDetails['rememberPassword'] = true // no matter what this should be true
-} else if (logOnDetails['password'] === undefined) {
-	logOnDetails['password'] = rl.question(`Steam Password for ${logOnDetails['accountName']}: `, {
-		hideEchoBack: true,
-		limit: pw => pw.length > 0
-	})
-	logOnDetails['rememberPassword'] = logOnDetails['rememberPassword'] || rl.question('Remember Password? (Yes or No) ', {
-		limit: ['yes', 'no'],
-		trueValue: ['yes'],
-		falseValue: ['no']
-	})
-}
-
-client.on('loginKey', key => fs.writeFileSync(composeLoginKeyPath(), key, 'utf8'))
-*/
-
 client.on('loggedOn', details => {
 	client.getNicknames(() => {
 		console.log(`Logged into Steam as '${client.accountInfo.name}' ${client.steamID.getSteam3RenderedID()}`);
