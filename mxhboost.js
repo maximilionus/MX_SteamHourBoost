@@ -5,7 +5,6 @@ const rl = require('readline-sync')
 const SteamUser = require('steam-user')
 
 const idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(","))
-console.log(idleList)
 
 if (idleList.length < 1) {
 	console.log('No games selected')
