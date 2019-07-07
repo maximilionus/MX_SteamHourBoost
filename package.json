@@ -9,7 +9,10 @@
 	"author": "MAXIMILI",
 	"license": "ISC",
 	"dependencies": {
+		"file-exists": "^5.0.1",
 		"fs": "0.0.1-security",
-		"steam": "^1.4.1"
+		"path": "^0.12.7",
+		"readline-sync": "^1.4.9",
+		"steam-user": "^4.12.0"
 	}
 }

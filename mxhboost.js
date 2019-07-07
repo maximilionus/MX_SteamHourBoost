@@ -1,54 +1,56 @@
-var Steam = require('steam');
-var fs = require('fs');
-var bot = new Steam.SteamClient();
+const fs = require('fs')
+const fileExists = require('file-exists')
+const path = require('path')
+const rl = require('readline-sync')
+const SteamUser = require('steam-user')
 
-if (fs.existsSync('sentryfile')) {
-	var sentry = fs.readFileSync('sentryfile');
-	console.log('[STEAM] logging in with sentry ');
-	bot.logOn({
-		accountName: process.env.STEAM_LOGIN,
-		password: process.env.STEAM_PASSWORD,
-		authCode: process.env.STEAM_2FA,
-		shaSentryfile: sentry
-	});
+const idleList = require('./idleList')
+
+if (idleList.length < 1) {
+	console.log('No games selected')
+	process.exit()
 }
-else {
-	console.log('[STEAM] logging in without sentry');
-	bot.logOn({
-		accountName: process.env.STEAM_LOGIN,
-		password: process.env.STEAM_PASSWORD,
-		authCode: process.env.STEAM_2FA,
-	});
+
+const client = new SteamUser()
+
+const logOnDetails = {
+	//'accountName': '',
+	'dontRememberMachine': false
 }
-bot.on('loggedOn', function () {
-	console.log('[STEAM] Logged in.');
-	bot.setPersonaState(Steam.EPersonaState.Online);
 
-	bot.gamesPlayed([process.env.STEAM_GAMEIDS.split(",")]);
-});
+const composeLoginKeyPath = () => path.join(client.options.dataDirectory, `loginKey.${logOnDetails.accountName}.txt`)
 
-bot.on('sentry', function (sentryHash) {//A sentry file is a file that is sent once you have
-	//passed steamguard verification.
-	console.log('[STEAM] Received sentry file.');
-	fs.writeFile('sentryfile', sentryHash, function (err) {
-		if (err) {
-			console.log(err);
-		} else {
-			console.log('[FS] Saved sentry file to disk.');
-		}
-	});
-});
-
-//Handle logon errors
-bot.on('error', function (e) {
-	console.log('[STEAM] ERROR - Logon failed');
-	if (e.eresult == Steam.EResult.InvalidPassword) {
-		console.log('Reason: invalid password');
-	}
-	else if (e.eresult == Steam.EResult.AlreadyLoggedInElsewhere) {
-		console.log('Reason: already logged in elsewhere');
-	}
-	else if (e.eresult == Steam.EResult.AccountLogonDenied) {
-		console.log('Reason: logon denied - steam guard needed');
-	}
+logOnDetails['accountName'] = logOnDetails['accountName'] || rl.question('Steam Account Name: ', {
+	limit: name => name.length > 0
 })
+
+if (fileExists.sync(composeLoginKeyPath())) {
+	logOnDetails['loginKey'] = fs.readFileSync(composeLoginKeyPath(), 'utf8')
+	logOnDetails['rememberPassword'] = true // no matter what this should be true
+} else if (logOnDetails['password'] === undefined) {
+	logOnDetails['password'] = rl.question(`Steam Password for ${logOnDetails['accountName']}: `, {
+		hideEchoBack: true,
+		limit: pw => pw.length > 0
+	})
+	logOnDetails['rememberPassword'] = logOnDetails['rememberPassword'] || rl.question('Remember Password? (Yes or No) ', {
+		limit: ['yes', 'no'],
+		trueValue: ['yes'],
+		falseValue: ['no']
+	})
+}
+
+client.on('loginKey', key => fs.writeFileSync(composeLoginKeyPath(), key, 'utf8'))
+
+client.on('loggedOn', details => {
+	client.getNicknames(() => {
+		console.log(`Logged into Steam as '${client.accountInfo.name}' ${client.steamID.getSteam3RenderedID()}`);
+		client.setPersona(SteamUser.EPersonaState.Busy);
+		client.gamesPlayed(idleList, true);
+		console.log(`Idling for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
+	})
+})
+
+// Some error occurred during logon
+client.on('error', e => console.log(e));
+
+client.logOn(logOnDetails)
