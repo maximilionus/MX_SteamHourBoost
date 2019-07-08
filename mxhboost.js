@@ -1,10 +1,6 @@
-const fs = require('fs')
-const fileExists = require('file-exists')
-const path = require('path')
-const rl = require('readline-sync')
 const SteamUser = require('steam-user')
 
-const idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(","))
+var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function(){return .5 - Math.random();})
 
 if (idleList.length < 1) {
 	console.log('No games selected')
