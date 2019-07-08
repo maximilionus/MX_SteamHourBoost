@@ -1,5 +1,12 @@
 const SteamUser = require('steam-user')
 
+const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
+setInterval(function() {
+	idleList = idleList.sort(function(){return .5 - Math.random();})
+	client.gamesPlayed(idleList);
+	console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
+}, idleList_shuffle_ms)
+
 var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function(){return .5 - Math.random();})
 
 if (idleList.length < 1) {
