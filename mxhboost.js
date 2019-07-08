@@ -1,6 +1,7 @@
 const SteamUser = require('steam-user')
 
 const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
+//Activate interval for idleList shuffle
 setInterval(function() {
 	idleList = idleList.sort(function(){return .5 - Math.random();})
 	client.gamesPlayed(idleList);
