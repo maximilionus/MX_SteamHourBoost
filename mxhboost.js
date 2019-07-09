@@ -95,9 +95,17 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		console.log(`TBOT: Idling status was changed to ${data_collected.idlingProcessStatus}`)
 	}
 
+	function sendFromUnauthToAdmin(ctx){
+		console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`)
+		if (typeof authUser !== 'undefined') {
+			tg_bot.telegram.sendMessage(authUser, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`)
+		}
+	}
+
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
 			console.log(`TBOT: Authorized user '${userId}' is online`)
+			var authUser = userId
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			//
 			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS))
@@ -115,7 +123,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx) ) 
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`)
-			tg_bot.on('message', (ctx) => console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`))
+			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx))
 			//Send all messages from unauthorized users to log
 		}
 	}
