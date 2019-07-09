@@ -50,7 +50,7 @@ client.on('loggedOn', details => {
 // Some error occurred during logon
 client.on('error', e => console.log(e));
 
-//client.logOn(logOnDetails) //TODO:Use in final build
+client.logOn(logOnDetails) //TODO:Use in final build
 
 
 //Init telegram bot
@@ -73,11 +73,19 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
 			console.log(`TBOT: Authorized user '${userId}' is online`)
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
-			tg_bot.command('current_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS))
+			//
+			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS))
+			//
+			tg_bot.command('get_idle_array', (ctx) => ctx.reply(idleList))
+			//
+			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx))
+			//
+			tg_bot.command('reset_idle_array', (ctx) => idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }))
+			//
 			tg_bot.command('time', (ctx) => ctx.reply(`
 			Time from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}
 			`))
-			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx))
+			//
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`)
 			tg_bot.on('message', (ctx) => console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`))
