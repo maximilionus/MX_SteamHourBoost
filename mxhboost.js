@@ -1,6 +1,5 @@
 const SteamUser = require('steam-user')
 const Telegraf = require('telegraf')
-const tg_bot = new Telegraf(process.env.TBOT_TOKEN);
 
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE)
 const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
@@ -41,6 +40,21 @@ client.on('error', e => console.log(e));
 
 client.logOn(logOnDetails)
 
-tg_bot.command('current_idle_array', (ctx) => ctx.reply(`Current idle list ${process.env.STEAM_GAMEIDS}`))
-tg_bot.launch()
-console.log("Telegram control successfully connected and ready to work")
+//Init telegram bot
+if (JSON.parse(process.env.TBOT_ENABLE)) {
+	const tg_bot = new Telegraf(process.env.TBOT_TOKEN)
+
+	function checkTGUser(userId) {
+		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
+			console.log(`TGBOT: Authorized user '${userId}' is online`)
+			tg_bot.command('current_idle_array', (ctx) => ctx.reply(`Current idle list ${process.env.STEAM_GAMEIDS}`))
+		} else {
+			console.log(`TGBOT: Access for user[${userId}] was denied.`)
+		}
+	}
+
+	tg_bot.start((ctx) => checkTGUser(ctx.from.id))
+	tg_bot.launch().then(console.log("Telegram control bot successfully connected and ready to work"))
+} else {
+	console.log("TBOT: Disabled by user, not initializing.")
+}
