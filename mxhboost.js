@@ -47,6 +47,8 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
 			console.log(`TGBOT: Authorized user '${userId}' is online`)
+
+			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome user!');
 			tg_bot.command('current_idle_array', (ctx) => ctx.reply(`Current idle list ${process.env.STEAM_GAMEIDS}`))
 		} else {
 			console.log(`TGBOT: Access for user[${userId}] was denied.`)
