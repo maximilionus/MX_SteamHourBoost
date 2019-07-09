@@ -1,4 +1,6 @@
 const SteamUser = require('steam-user')
+const Telegraf = require('telegraf')
+const tg_bot = new Telegraf(process.env.TBOT_TOKEN);
 
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE)
 const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
@@ -38,3 +40,7 @@ client.on('loggedOn', details => {
 client.on('error', e => console.log(e));
 
 client.logOn(logOnDetails)
+
+tg_bot.command('current_idle_array', (ctx) => ctx.reply(`Current idle list ${process.env.STEAM_GAMEIDS}`))
+tg_bot.launch()
+console.log("Telegram control successfully connected and ready to work")
