@@ -76,6 +76,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	function resetOverriddenIdleList(ctx){
 		idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); })
 		client.gamesPlayed(idleList, forceIdle)
+		data_collected.timeFromShuffle = 0
 
 		ctx.reply('Idle array was reseted to process.env state')
 		console.log('TBOT: Idle array was reseted to process.env state')
