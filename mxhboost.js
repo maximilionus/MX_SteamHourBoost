@@ -5,7 +5,7 @@ const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
 //Activate interval for idleList shuffle
 setInterval(function() {
 	idleList = idleList.sort(function(){return .5 - Math.random();})
-	client.gamesPlayed(idleList, true);
+	client.gamesPlayed(idleList, forceIdle);
 	console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
 }, idleList_shuffle_ms)
 
@@ -29,7 +29,7 @@ client.on('loggedOn', details => {
 	client.getNicknames(() => {
 		console.log(`Logged into Steam as '${client.accountInfo.name}' ${client.steamID.getSteam3RenderedID()}`);
 		client.setPersona(SteamUser.EPersonaState.Busy);
-		client.gamesPlayed(idleList, true);
+		client.gamesPlayed(idleList, forceIdle);
 		console.log(`Idling for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
 	})
 })
