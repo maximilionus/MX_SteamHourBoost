@@ -6,12 +6,15 @@ const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
 
 //Init timers
 var data_collected = {
+	idlingProcessStatus: true,
 	timeFromStartup: 0,
 	timeFromShuffle: 0
 }
 setInterval(function () {
-	data_collected.timeFromStartup++
-	data_collected.timeFromShuffle++
+	if (data_collected.idlingProcessStatus) {
+		data_collected.timeFromStartup++
+		data_collected.timeFromShuffle++
+	}
 }, 1000)
 
 //Activate interval for idleList shuffle
@@ -50,7 +53,7 @@ client.on('loggedOn', details => {
 // Some error occurred during logon
 client.on('error', e => console.log(e));
 
-client.logOn(logOnDetails) //TODO:Use in final build
+client.logOn(logOnDetails)
 
 
 //Init telegram bot
@@ -69,6 +72,29 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		console.log(`TBOT: Idle array was force overridden by user\nNew array: [${idleList}]`)
 	}
 
+	function resetOverriddenIdleList(ctx){
+		idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); })
+		client.gamesPlayed(idleList, forceIdle)
+
+		ctx.reply('Idle array was reseted to process.env state')
+		console.log('TBOT: Idle array was reseted to process.env state')
+	}
+
+	function switchIdleStatus(ctx){
+		if (data_collected.idlingProcessStatus){
+			data_collected.idlingProcessStatus = false
+			data_collected.timeFromShuffle = 0
+			data_collected.timeFromStartup = 0
+
+			client.gamesPlayed()
+		} else {
+			data_collected.idlingProcessStatus = true
+			client.gamesPlayed(idleList, forceIdle)
+		}
+		ctx.reply(`Idling status was changed to ${data_collected.idlingProcessStatus}`)
+		console.log(`TBOT: Idling status was changed to ${data_collected.idlingProcessStatus}`)
+	}
+
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
 			console.log(`TBOT: Authorized user '${userId}' is online`)
@@ -80,12 +106,13 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			//
 			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx))
 			//
-			tg_bot.command('reset_idle_array', (ctx) => idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }))
+			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx))
 			//
-			tg_bot.command('time', (ctx) => ctx.reply(`
-			Time from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}
+			tg_bot.command('status', (ctx) => ctx.reply(`
+			Idling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n=====
 			`))
 			//
+			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx) ) 
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`)
 			tg_bot.on('message', (ctx) => console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`))
