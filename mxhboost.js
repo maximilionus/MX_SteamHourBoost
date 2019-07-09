@@ -8,13 +8,14 @@ const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
 var data_collected = {
 	idlingProcessStatus: true,
 	timeFromStartup: 0,
-	timeFromShuffle: 0
+	timeFromShuffle: 0,
+	restartDate: new Date()
 }
 setInterval(function () {
 	if (data_collected.idlingProcessStatus) {
-		data_collected.timeFromStartup++
 		data_collected.timeFromShuffle++
 	}
+	data_collected.timeFromStartup++
 }, 1000)
 
 //Activate interval for idleList shuffle
@@ -84,7 +85,6 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (data_collected.idlingProcessStatus){
 			data_collected.idlingProcessStatus = false
 			data_collected.timeFromShuffle = 0
-			data_collected.timeFromStartup = 0
 
 			client.gamesPlayed()
 		} else {
@@ -109,7 +109,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx))
 			//
 			tg_bot.command('status', (ctx) => ctx.reply(`
-			Idling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n=====
+			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n=====
 			`))
 			//
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx) ) 
