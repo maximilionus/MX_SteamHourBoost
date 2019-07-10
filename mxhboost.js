@@ -92,7 +92,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			data_collected.timeFromShuffle = 0
 			data_collected.lastShuffleType = 'Forced (Idle switch)'
 
-			client.gamesPlayed()
+			client.gamesPlayed([], true)
 		} else {
 			data_collected.idlingProcessStatus = true
 			client.gamesPlayed(idleList, forceIdle)
