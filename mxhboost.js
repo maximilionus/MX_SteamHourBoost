@@ -2,7 +2,7 @@ const SteamUser = require('steam-user')
 const Telegraf = require('telegraf')
 
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE)
-const idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
+var idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
 
 //Init timers
 var data_collected = {
@@ -20,9 +20,9 @@ setInterval(function () {
 }, 1000)
 
 var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }) //Init idleList
-setInterval(function (idleList) {
+setInterval(function () {
 	if (data_collected.idlingProcessStatus) {
-		idleList = idleList.sort(function () { return .5 - Math.random(); })
+		var idleList = idleList.sort(function () { return .5 - Math.random(); })
 		client.gamesPlayed(idleList, forceIdle)
 		data_collected.timeFromShuffle = 0
 		data_collected.lastShuffleType = 'Scheduled'
@@ -123,6 +123,8 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx))
 			//
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx))
+			//
+			tg_bot.command('set_idleShuffle_time',(ctx) => idleList_shuffle_ms=ctx.message.text.replace('/set_idleShuffle_time ', ''))
 			//
 			tg_bot.command('status', (ctx) => ctx.reply(`
 			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${data_collected.lastShuffleType}\n=====
