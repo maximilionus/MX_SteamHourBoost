@@ -9,6 +9,7 @@ var data_collected = {
 	idlingProcessStatus: true,
 	timeFromStartup: 0,
 	timeFromShuffle: 0,
+	lastShuffleType: 'none',
 	restartDate: new Date()
 }
 setInterval(function () {
@@ -21,8 +22,9 @@ setInterval(function () {
 //Activate interval for idleList shuffle
 setInterval(function () {
 	idleList = idleList.sort(function () { return .5 - Math.random(); })
-	client.gamesPlayed(idleList, forceIdle);
-	data_collected.timeFromShuffle = 0;
+	client.gamesPlayed(idleList, forceIdle)
+	data_collected.timeFromShuffle = 0
+	data_collected.lastShuffleType = 'Scheduled'
 	console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
 }, idleList_shuffle_ms)
 
@@ -68,6 +70,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		idleList = idleList.sort(function () { return .5 - Math.random(); })
 		client.gamesPlayed(idleList, forceIdle);
 		data_collected.timeFromShuffle = 0;
+		data_collected.lastShuffleType = 'Forced (Idle array update)'
 
 		ctx.reply(`Idle array was successfully force overridden with\n${ctx.message.text.replace('/set_idle_array ', '')}\n\nFinal variant of array:\n${idleList}`)
 		console.log(`TBOT: Idle array was force overridden by user\nNew array: [${idleList}]`)
@@ -77,6 +80,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); })
 		client.gamesPlayed(idleList, forceIdle)
 		data_collected.timeFromShuffle = 0
+		data_collected.lastShuffleType = 'Forced (Reset idle list to env)'
 
 		ctx.reply('Idle array was reseted to process.env state')
 		console.log('TBOT: Idle array was reseted to process.env state')
@@ -86,6 +90,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (data_collected.idlingProcessStatus){
 			data_collected.idlingProcessStatus = false
 			data_collected.timeFromShuffle = 0
+			data_collected.lastShuffleType = 'Forced (Idle switch)'
 
 			client.gamesPlayed()
 		} else {
@@ -96,7 +101,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		console.log(`TBOT: Idling status was changed to ${data_collected.idlingProcessStatus}`)
 	}
 
-	function sendFromUnauthToAdmin(ctx){
+	function sendFromUnauthToAdmin(ctx, authUser){
 		console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`)
 		if (typeof authUser !== 'undefined') {
 			tg_bot.telegram.sendMessage(authUser, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`)
@@ -104,9 +109,9 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	}
 
 	function checkTGUser(userId) {
-		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) { //User id check
+		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
 			console.log(`TBOT: Authorized user '${userId}' is online`)
-			var authUser = userId
+			let authUser = userId
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			//
 			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS))
@@ -118,13 +123,13 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx))
 			//
 			tg_bot.command('status', (ctx) => ctx.reply(`
-			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s): ${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s): ${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n=====
+			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${data_collected.lastShuffleType}\n=====
 			`))
 			//
-			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx) ) 
+			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx, authUser) ) 
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`)
-			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx))
+			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx)) //TODO: Doesn't work for some reason
 			//Send all messages from unauthorized users to log
 		}
 	}
