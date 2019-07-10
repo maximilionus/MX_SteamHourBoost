@@ -124,7 +124,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			//
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx))
 			//
-			tg_bot.command('set_idleShuffle_time',(ctx) => idleList_shuffle_ms=ctx.message.text.replace('/set_idleShuffle_time ', ''))
+			tg_bot.command('set_idleshuffle_time',(ctx) => idleList_shuffle_ms=ctx.message.text.replace('/set_idleshuffle_time ', ''))
 			//
 			tg_bot.command('status', (ctx) => ctx.reply(`
 			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${data_collected.lastShuffleType}\n=====
