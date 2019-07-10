@@ -19,16 +19,16 @@ setInterval(function () {
 	data_collected.timeFromStartup++
 }, 1000)
 
-//Activate interval for idleList shuffle
-setInterval(function () {
+var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }) //Init idleList
+setInterval(function (idleList) {
 	idleList = idleList.sort(function () { return .5 - Math.random(); })
 	client.gamesPlayed(idleList, forceIdle)
 	data_collected.timeFromShuffle = 0
 	data_collected.lastShuffleType = 'Scheduled'
 	console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`)
 }, idleList_shuffle_ms)
+//Activate interval for idleList shuffle
 
-var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); })
 
 if (idleList.length < 1) {
 	console.log('No games selected')
