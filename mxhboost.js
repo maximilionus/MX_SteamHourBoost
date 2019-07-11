@@ -1,5 +1,7 @@
 const SteamUser = require('steam-user')
 const Telegraf = require('telegraf')
+const Dotenv = require('dotenv')
+Dotenv.config()
 
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE)
 var idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY)
