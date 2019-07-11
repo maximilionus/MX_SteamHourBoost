@@ -105,17 +105,14 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		console.log(`TBOT: Idling status was changed to ${data_collected.idlingProcessStatus}`)
 	}
 
-	function sendFromUnauthToAdmin(ctx, authUser){
+	function sendFromUnauthToAdmin(ctx){
 		console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`)
-		if (typeof authUser !== 'undefined') {
-			tg_bot.telegram.sendMessage(authUser, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`)
-		}
+		tg_bot.telegram.sendMessage(process.env.TBOT_ACCESSID, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`)
 	}
 
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
 			console.log(`TBOT: Authorized user '${userId}' is online`)
-			let authUser = userId
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			//
 			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS))
@@ -132,7 +129,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${data_collected.lastShuffleType}\n=====
 			`))
 			//
-			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx, authUser) ) 
+			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx)) 
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`)
 			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx)) //TODO: Doesn't work for some reason
