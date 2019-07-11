@@ -24,7 +24,7 @@ setInterval(function () {
 var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }) //Init idleList
 setInterval(function () {
 	if (data_collected.idlingProcessStatus) {
-		var idleList = idleList.sort(function () { return .5 - Math.random(); })
+		idleList = idleList.sort(function () { return .5 - Math.random(); })
 		client.gamesPlayed(idleList, forceIdle)
 		data_collected.timeFromShuffle = 0
 		data_collected.lastShuffleType = 'Scheduled'
