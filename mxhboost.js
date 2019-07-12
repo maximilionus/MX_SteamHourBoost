@@ -76,7 +76,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		data_collected.timeFromShuffle = 0;
 		data_collected.lastShuffleType = 'Forced (Idle array update)'
 
-		ctx.reply(`Idle array was successfully force overridden with\n${ctx.message.text.replace('/set_idle_array ', '')}\n\nFinal variant of array:\n${idleList}`)
+		ctx.reply('Idle array was successfully force overridden')
 		console.log(`TBOT: Idle array was force overridden by user\nNew array: [${idleList}]`)
 	}
 
