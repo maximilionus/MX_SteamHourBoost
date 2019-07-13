@@ -121,8 +121,6 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			//
 			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx));
 			//
-			tg_bot.command('set_authCode', (ctx) => core_data.steam_AUTH_Code = ctx.message.replace('/set_authCode ', ''))
-			//
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx));
 			//
 			tg_bot.command('info', (ctx) => ctx.reply(`
