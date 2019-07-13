@@ -7,27 +7,28 @@ const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE);
 var idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY);
 
 //Init timers
-var data_collected = {
+var core_data = {
 	idlingProcessStatus: true,
 	timeFromStartup: 0,
 	timeFromShuffle: 0,
 	lastShuffleType: 'none',
+	steam_AUTH_Code: process.env.STEAM_2FA,
 	restartDate: new Date()
 };
 setInterval(function () {
-	if (data_collected.idlingProcessStatus) {
-		data_collected.timeFromShuffle++;
+	if (core_data.idlingProcessStatus) {
+		core_data.timeFromShuffle++;
 	};
-	data_collected.timeFromStartup++;
+	core_data.timeFromStartup++;
 }, 1000);
 
 var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); }); //Init idleList
 setInterval(function () {
-	if (data_collected.idlingProcessStatus) {
+	if (core_data.idlingProcessStatus) {
 		idleList = idleList.sort(function () { return .5 - Math.random(); });
 		client.gamesPlayed(idleList, forceIdle);
-		data_collected.timeFromShuffle = 0;
-		data_collected.lastShuffleType = 'Scheduled';
+		core_data.timeFromShuffle = 0;
+		core_data.lastShuffleType = 'Scheduled';
 		console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`);
 	};
 }, idleList_shuffle_ms);
@@ -44,7 +45,7 @@ const client = new SteamUser();
 const logOnDetails = {
 	'accountName': process.env.STEAM_LOGIN,
 	'password': process.env.STEAM_PASSWORD,
-	'twoFactorCode': process.env.STEAM_2FA,
+	'twoFactorCode': core_data.steam_AUTH_Code,
 	'dontRememberMachine': true
 };
 
@@ -73,8 +74,8 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		idleList = JSON.parse((inputString).split(","));
 		idleList = idleList.sort(function () { return .5 - Math.random(); });
 		client.gamesPlayed(idleList, forceIdle);
-		data_collected.timeFromShuffle = 0;
-		data_collected.lastShuffleType = 'Forced (Idle array update)';
+		core_data.timeFromShuffle = 0;
+		core_data.lastShuffleType = 'Forced (Idle array update)';
 
 		ctx.reply('Idle array was successfully force overridden');
 		console.log(`TBOT: Idle array was force overridden by user\nNew array: [${idleList}]`);
@@ -83,25 +84,25 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	function resetOverriddenIdleList(ctx){
 		idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); });
 		client.gamesPlayed(idleList, forceIdle);
-		data_collected.timeFromShuffle = 0;
-		data_collected.lastShuffleType = 'Forced (Reset idle list to env)';
+		core_data.timeFromShuffle = 0;
+		core_data.lastShuffleType = 'Forced (Reset idle list to env)';
 
 		ctx.reply('Idle array was reseted to process.env state');
 		console.log('TBOT: Idle array was reseted to process.env state');
 	}
 
 	function switchIdleStatus(ctx) {
-		if (data_collected.idlingProcessStatus) {
-			data_collected.idlingProcessStatus = false;
-			data_collected.timeFromShuffle = 0;
-			data_collected.lastShuffleType = 'Forced (Idle switch)';
+		if (core_data.idlingProcessStatus) {
+			core_data.idlingProcessStatus = false;
+			core_data.timeFromShuffle = 0;
+			core_data.lastShuffleType = 'Forced (Idle switch)';
 			client.gamesPlayed([], true);
 		} else {
-			data_collected.idlingProcessStatus = true;
+			core_data.idlingProcessStatus = true;
 			client.gamesPlayed(idleList, forceIdle);
 		};
-		ctx.reply(`Idling status was changed to ${data_collected.idlingProcessStatus}`);
-		console.log(`TBOT: Idling status was changed to ${data_collected.idlingProcessStatus}`);
+		ctx.reply(`Idling status was changed to ${core_data.idlingProcessStatus}`);
+		console.log(`TBOT: Idling status was changed to ${core_data.idlingProcessStatus}`);
 	};
 
 	function sendFromUnauthToAdmin(ctx){
@@ -120,10 +121,12 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			//
 			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx));
 			//
+			tg_bot.command('set_authCode', (ctx) => core_data.steam_AUTH_Code = ctx.message.replace('/set_authCode ', ''))
+			//
 			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx));
 			//
 			tg_bot.command('info', (ctx) => ctx.reply(`
-			=====\nLast restart date: ${data_collected.restartDate}\n=====\nIdling status: [${data_collected.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(data_collected.timeFromStartup / 3600)}:${Math.floor(data_collected.timeFromStartup % 3600 / 60)}:${data_collected.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(data_collected.timeFromShuffle / 3600)}:${Math.floor(data_collected.timeFromShuffle % 3600 / 60)}:${Math.floor(data_collected.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${data_collected.lastShuffleType}\n=====
+			=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [${core_data.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====
 			`));
 			//
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
