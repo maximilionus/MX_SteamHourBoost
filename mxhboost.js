@@ -52,7 +52,7 @@ const logOnDetails = {
 client.on('loggedOn', details => {
 	client.getNicknames(() => {
 		console.log(`Logged into Steam as '${client.accountInfo.name}' ${client.steamID.getSteam3RenderedID()}`);
-		client.setPersona(SteamUser.EPersonaState.Busy);
+		client.setPersona(SteamUser.EPersonaState.Snooze);
 		client.gamesPlayed(idleList, forceIdle);
 		console.log(`Idling for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`);
 	});
@@ -95,12 +95,12 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (core_data.idlingProcessStatus) {
 			core_data.idlingProcessStatus = false;
 			core_data.timeFromShuffle = 0;
-			core_data.lastShuffleType = 'Forced (Idle switch)';
 			client.gamesPlayed([], true);
 		} else {
 			core_data.idlingProcessStatus = true;
 			client.gamesPlayed(idleList, forceIdle);
 		};
+		core_data.lastShuffleType = 'Forced (Idle switch)';
 		ctx.reply(`Idling status was changed to ${core_data.idlingProcessStatus}`);
 		console.log(`TBOT: Idling status was changed to ${core_data.idlingProcessStatus}`);
 	};
