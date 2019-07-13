@@ -14,8 +14,8 @@
 ### Telegram bot commands-list
 ```
 start - Init
+info - Get all collected data
 idle_switch - Enable/End idling(will stay online)
-status - Get all collected data
 get_idle_array - Return array with current idling IDs
 get_env_idle_array - Return array values from process.env
 set_idle_array - Override current idle array with new values
