@@ -20,5 +20,4 @@ get_idle_array - Return array with current idling IDs
 get_env_idle_array - Return array values from process.env
 set_idle_array - Override current idle array with new values
 reset_idle_array - Reset overridden array to process.env value
-set_idleshuffle_time - Set idle array shuffle timer (ms)
 ```
