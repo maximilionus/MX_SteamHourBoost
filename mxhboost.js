@@ -1,6 +1,7 @@
 const SteamUser = require('steam-user');
 const Telegraf = require('telegraf');
 const Dotenv = require('dotenv');
+const SocksAgent = require('socks5-https-client/lib/Agent');
 Dotenv.config();
 
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE);
@@ -66,7 +67,18 @@ client.logOn(logOnDetails);
 
 //Init telegram bot
 if (JSON.parse(process.env.TBOT_ENABLE)) {
-	const tg_bot = new Telegraf(process.env.TBOT_TOKEN);
+	const tg_bot;
+
+	//Use SOCKS5 proxy if Telegram API blacklisted
+	if (typeof process.env.TBOT_USESOCKS !== 'undefined' || process.env.TBOT_USESOCKS === 'false') {
+		const socksAgent = new SocksAgent({
+			socksHost: process.env.TBOT_SOCKS_HOST,
+			socksPort: process.env.TBOT_SOCKS_PORT
+		});
+		tg_bot = new Telegraf(process.env.TBOT_TOKEN, {
+			telegram: { agent: socksAgent }
+		});
+	} else { tg_bot = new Telegraf(process.env.TBOT_TOKEN); };
 
 	function forceChangeIdleArr(ctx){
 		inputString = ctx.message.text.replace('/set_idle_array', '');
