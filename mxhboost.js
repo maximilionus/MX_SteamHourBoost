@@ -67,7 +67,7 @@ client.logOn(logOnDetails);
 
 //Init telegram bot
 if (JSON.parse(process.env.TBOT_ENABLE)) {
-	const tg_bot;
+	var tg_bot;
 
 	//Use SOCKS5 proxy if Telegram API blacklisted
 	if (typeof process.env.TBOT_USESOCKS !== 'undefined' || process.env.TBOT_USESOCKS === 'false') {

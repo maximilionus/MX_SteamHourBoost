@@ -12,7 +12,7 @@
 | TBOT_ACCESSID      | `int`         | Telegram bot will compare userID with this int after `/start` command and ignore unauthorized users (if enabled) |
 | TBOT_USESOCKS      | `bool`        | Use socks5 connection for telegram bot?                                                                          |
 | TBOT_SOCKS_HOST    | `str`         | socks5 host ip                                                                                                   |
-| TBOT_SOCKS_PORT    | `str`         | socks5 host port                                                                                                 |
+| TBOT_SOCKS_PORT    | `int`         | socks5 host port                                                                                                 |
 ---
 
 ### Telegram bot commands-list
