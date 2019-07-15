@@ -70,7 +70,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	var tg_bot;
 
 	//Use SOCKS5 proxy if Telegram API blacklisted
-	if (typeof process.env.TBOT_USESOCKS !== 'undefined' || process.env.TBOT_USESOCKS === 'false') {
+	if (typeof process.env.TBOT_USESOCKS !== 'undefined' || process.env.TBOT_USESOCKS !== 'false') {
 		const socksAgent = new SocksAgent({
 			socksHost: process.env.TBOT_SOCKS_HOST,
 			socksPort: process.env.TBOT_SOCKS_PORT
