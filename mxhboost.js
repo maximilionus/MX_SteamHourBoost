@@ -141,6 +141,8 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			`));
 			//
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
+			//
+			tg_bot.command('restart', function() {throw new Error("TBOT: Restart command received. Terminating process.");});
 		} else {
 			console.log(`TBOT: Access for user[${userId}] was denied.`);
 			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx));
