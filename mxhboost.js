@@ -123,6 +123,18 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		tg_bot.telegram.sendMessage(process.env.TBOT_ACCESSID, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`);
 	};
 
+	function set2FAkeyAndRelog(key_str) {
+		let key_str_final = key_str.replace('/set2fa', '');
+		let logOnDetails = {
+			'accountName': process.env.STEAM_LOGIN,
+			'password': process.env.STEAM_PASSWORD,
+			'twoFactorCode': key_str_final,
+			'dontRememberMachine': true
+		};
+		
+		client.logOn(logOnDetails);
+	};
+
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
 			console.log(`TBOT: Authorized user '${userId}' is online`);
@@ -141,6 +153,8 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			`));
 			//
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
+			//
+			tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text)) //TODO:
 			//
 			tg_bot.command('restart', () => (process.exit()));
 		} else {
