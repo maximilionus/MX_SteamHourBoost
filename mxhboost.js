@@ -124,6 +124,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	};
 
 	function set2FAkeyAndRelog(key_str) {
+		client.logOff();
 		let key_str_final = key_str.replace('/set2fa', '');
 		let logOnDetails = {
 			'accountName': process.env.STEAM_LOGIN,
