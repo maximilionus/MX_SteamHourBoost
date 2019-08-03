@@ -175,9 +175,6 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 SteamAPI.on('friendMessage', function(senderID, senderMessage){
 	SteamAPI.chatMessage(senderID, '1110011 1101111 1110010 1110010 1111001 100000 1101001 1101101 100000 1100011 1110101 1110010 1110010 1100101 1101110 1110100 1101100 1111001 100000 1101111 1100110 1100110 1101100 1101001 1101110 1100101 👍');
-	if (JSON.parse(process.env.TBOT_ENABLE) == true && core_data.tbot_userLogged == true) {
-		tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), `STEAM DM From #${senderID}\n=====\n${senderMessage}`);
-	};
 });
 
 SteamAPI.logOn(logOnDetails);
