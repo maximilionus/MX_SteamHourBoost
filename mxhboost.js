@@ -7,15 +7,17 @@ Dotenv.config();
 const forceIdle = JSON.parse(process.env.STEAM_FORCEIDLE);
 var idleList_shuffle_ms = JSON.parse(process.env.CORE_SHUFFLE_DELAY);
 
-//Init timers
 var core_data = {
 	idlingProcessStatus: true,
 	timeFromStartup: 0,
 	timeFromShuffle: 0,
 	lastShuffleType: 'none',
 	steam_AUTH_Code: process.env.STEAM_2FA,
-	restartDate: new Date()
+	restartDate: new Date(),
+	tbot_userLogged: false
 };
+
+//Init timers
 setInterval(function () {
 	if (core_data.idlingProcessStatus) {
 		core_data.timeFromShuffle++;
@@ -27,7 +29,7 @@ var idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function ()
 setInterval(function () {
 	if (core_data.idlingProcessStatus) {
 		idleList = idleList.sort(function () { return .5 - Math.random(); });
-		client.gamesPlayed(idleList, forceIdle);
+		SteamAPI.gamesPlayed(idleList, forceIdle);
 		core_data.timeFromShuffle = 0;
 		core_data.lastShuffleType = 'Scheduled';
 		console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`);
@@ -41,7 +43,7 @@ if (idleList.length < 1) {
 	process.exit();
 };
 
-const client = new SteamUser();
+const SteamAPI = new SteamUser();
 
 const logOnDetails = {
 	'accountName': process.env.STEAM_LOGIN,
@@ -50,19 +52,18 @@ const logOnDetails = {
 	'dontRememberMachine': true
 };
 
-client.on('loggedOn', details => {
-	client.getNicknames(() => {
-		console.log(`Logged into Steam as '${client.accountInfo.name}' ${client.steamID.getSteam3RenderedID()}`);
-		client.setPersona(SteamUser.EPersonaState.Online);
-		client.gamesPlayed(idleList, forceIdle);
+SteamAPI.on('loggedOn', details => {
+	SteamAPI.getNicknames(() => {
+		console.log(`Logged into Steam as '${SteamAPI.accountInfo.name}' ${SteamAPI.steamID.getSteam3RenderedID()}`);
+		SteamAPI.setPersona(SteamUser.EPersonaState.Online);
+		SteamAPI.gamesPlayed(idleList, forceIdle);
 		console.log(`Idling for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`);
 	});
 });
 
 // Some error occurred during logon
-client.on('error', e => console.log(e));
+SteamAPI.on('error', e => console.log(e));
 
-client.logOn(logOnDetails);
 
 
 //Init telegram bot
@@ -85,7 +86,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 		idleList = JSON.parse((inputString).split(","));
 		idleList = idleList.sort(function () { return .5 - Math.random(); });
-		client.gamesPlayed(idleList, forceIdle);
+		SteamAPI.gamesPlayed(idleList, forceIdle);
 		core_data.timeFromShuffle = 0;
 		core_data.lastShuffleType = 'Forced (Idle array update)';
 
@@ -95,7 +96,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 	function resetOverriddenIdleList(ctx){
 		idleList = JSON.parse(process.env.STEAM_GAMEIDS.split(",")).sort(function () { return .5 - Math.random(); });
-		client.gamesPlayed(idleList, forceIdle);
+		SteamAPI.gamesPlayed(idleList, forceIdle);
 		core_data.timeFromShuffle = 0;
 		core_data.lastShuffleType = 'Forced (Reset idle list to env)';
 
@@ -107,11 +108,11 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (core_data.idlingProcessStatus) {
 			core_data.idlingProcessStatus = false;
 			core_data.timeFromShuffle = 0;
-			client.gamesPlayed([], true);
-			client.setPersona(SteamUser.EPersonaState.Online);
+			SteamAPI.gamesPlayed([], true);
+			SteamAPI.setPersona(SteamUser.EPersonaState.Online);
 		} else {
 			core_data.idlingProcessStatus = true;
-			client.gamesPlayed(idleList, forceIdle);
+			SteamAPI.gamesPlayed(idleList, forceIdle);
 		};
 		core_data.lastShuffleType = 'Forced (Idle switch)';
 		ctx.reply(`Idling status was changed to ${core_data.idlingProcessStatus}`);
@@ -124,7 +125,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	};
 
 	function set2FAkeyAndRelog(key_str) {
-		client.logOff();
+		SteamAPI.logOff();
 		let key_str_final = key_str.replace('/set2fa', '');
 		let logOnDetails = {
 			'accountName': process.env.STEAM_LOGIN,
@@ -133,12 +134,13 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			'dontRememberMachine': true
 		};
 		
-		client.logOn(logOnDetails);
+		SteamAPI.logOn(logOnDetails);
 	};
 
 	function checkTGUser(userId) {
 		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
 			console.log(`TBOT: Authorized user '${userId}' is online`);
+			core_data.tbot_userLogged = true;
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			//
 			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS));
@@ -155,13 +157,13 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			//
 			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
 			//
-			tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text)) //TODO:
+			tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text))
 			//
 			tg_bot.command('restart', () => (process.exit()));
 		} else {
+			//Send all messages from unauthorized users to log
 			console.log(`TBOT: Access for user[${userId}] was denied.`);
 			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx));
-			//Send all messages from unauthorized users to log
 		};
 	};
 
@@ -170,3 +172,12 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 } else {
 	console.log("TBOT: Disabled by user, not initializing.");
 };
+
+SteamAPI.on('friendMessage', function(senderID, senderMessage){
+	SteamAPI.chatMessage(senderID, '1110011 1101111 1110010 1110010 1111001 100000 1101001 1101101 100000 1100011 1110101 1110010 1110010 1100101 1101110 1110100 1101100 1111001 100000 1101111 1100110 1100110 1101100 1101001 1101110 1100101 👍');
+	if (JSON.parse(process.env.TBOT_ENABLE) == true && core_data.tbot_userLogged == true) {
+		tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), `STEAM DM From #${senderID}\n=====\n${senderMessage}`);
+	};
+});
+
+SteamAPI.logOn(logOnDetails);
