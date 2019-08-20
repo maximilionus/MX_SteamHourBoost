@@ -129,7 +129,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		let key_str_final = key_str.replace('/set2fa', '');
 		let logOnDetails = {
 			'accountName': process.env.STEAM_LOGIN,
-			'password': process.env.STEAM_PASSWORD,
+			'password': Buffer.from(process.env.STEAM_PASSWORD, 'base64').toString('ascii'),
 			'twoFactorCode': key_str_final,
 			'dontRememberMachine': true
 		};
