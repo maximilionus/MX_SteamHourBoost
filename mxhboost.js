@@ -47,7 +47,7 @@ const SteamAPI = new SteamUser();
 
 const logOnDetails = {
 	'accountName': process.env.STEAM_LOGIN,
-	'password': process.env.STEAM_PASSWORD,
+	'password': Buffer.from(process.env.STEAM_PASSWORD, 'base64').toString('ascii'),
 	'twoFactorCode': core_data.steam_AUTH_Code,
 	'dontRememberMachine': true
 };
