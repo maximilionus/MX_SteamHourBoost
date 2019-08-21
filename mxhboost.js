@@ -142,6 +142,12 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			console.log(`TBOT: Authorized user '${userId}' is online`);
 			core_data.tbot_userLogged = true;
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
+			
+			SteamAPI.on('friendMessage', function(){
+				console.log('TBOT: [STEAM] - You have a new chat message.');
+				tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
+			});
+			
 			//
 			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS));
 			//
@@ -173,8 +179,5 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	console.log("TBOT: Disabled by user, not initializing.");
 };
 
-SteamAPI.on('friendMessage', function(senderID, senderMessage){
-	SteamAPI.chatMessage(senderID, '1110011 1101111 1110010 1110010 1111001 100000 1101001 1101101 100000 1100011 1110101 1110010 1110010 1100101 1101110 1110100 1101100 1111001 100000 1101111 1100110 1100110 1101100 1101001 1101110 1100101 👍');
-});
 
 SteamAPI.logOn(logOnDetails);
