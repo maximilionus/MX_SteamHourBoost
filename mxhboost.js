@@ -195,7 +195,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	var allowSteamMSGNotifications = false;
 	function switch_SteamMSGAllowNotifications(ctx) {
 		if (checkTGUser(ctx.message.chat.id)) {
-			allowSteamMSGNotifications ? (allowSteamMSGNotifications = true) : (allowSteamMSGNotifications = false);
+			allowSteamMSGNotifications ? (allowSteamMSGNotifications = false) : (allowSteamMSGNotifications = true);
 			console.log(`[TBOT]>[/snotif_switch] : Steam message notification system status: ${allowSteamMSGNotifications}`)
 			ctx.reply(`Steam message notification system status: ${allowSteamMSGNotifications}`);
 		} else {
@@ -204,8 +204,10 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	};
 
 	SteamAPI.on('friendMessage', function(){
-		console.log('[TBOT]=>[STEAM] : You have a new chat message.');
-		tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
+		if (allowSteamMSGNotifications) {
+			console.log('[TBOT]=>[STEAM] : You have a new chat message.');
+			tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
+		};
 	});
 
 	/* * * * * * * * * * * * */
