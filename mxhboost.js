@@ -85,8 +85,6 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	function checkTGUser(userId) { // ctx.message.chat.id
 		let AccessAllowed = false;
 		if (userId === JSON.parse(process.env.TBOT_ACCESSID)) {
-			console.log(`[TBOT] : Authorized user '${userId}' is online`);
-			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			AccessAllowed = true;
 		} else {
 			console.log(`[TBOT] : Access for user[${userId}] was denied.`);
