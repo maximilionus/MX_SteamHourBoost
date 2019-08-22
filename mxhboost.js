@@ -13,11 +13,10 @@ var core_data = {
 	timeFromShuffle: 0,
 	lastShuffleType: 'none',
 	steam_AUTH_Code: process.env.STEAM_2FA,
-	restartDate: new Date(),
-	tbot_userLogged: false
+	restartDate: new Date()
 };
 
-//Init timers
+// Init timers
 setInterval(function () {
 	if (core_data.idlingProcessStatus) {
 		core_data.timeFromShuffle++;
@@ -35,7 +34,7 @@ setInterval(function () {
 		console.log(`Idle array successfully shuffled and restarted idle process for GameID${Array.isArray(idleList) && idleList.length > 1 ? 's' : ''} [${idleList}]`);
 	};
 }, idleList_shuffle_ms);
-//Activate interval for idleList shuffle
+// Activate interval for idleList shuffle
 
 
 if (idleList.length < 1) {
@@ -66,11 +65,15 @@ SteamAPI.on('error', e => console.log(e));
 
 
 
-//Init telegram bot
+// Init telegram bot
 if (JSON.parse(process.env.TBOT_ENABLE)) {
 	var tg_bot;
-
-	//Use SOCKS5 proxy if Telegram API blacklisted
+	
+	/* * */
+	const TBOT_UNAUTHWARNING = "Not whitelisted user request detected";
+	/* consts with all static strings */
+	
+	// Use SOCKS5 proxy if Telegram API blacklisted
 	if (process.env.TBOT_USESOCKS !== 'false') {
 		const socksAgent = new SocksAgent({
 			socksHost: process.env.TBOT_SOCKS_HOST,
@@ -80,18 +83,35 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			telegram: { agent: socksAgent }
 		});
 	} else { tg_bot = new Telegraf(process.env.TBOT_TOKEN); };
+	
+	function checkTGUser(userId) { // ctx.message.chat.id
+		let AccessAllowed = false;
+		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
+			console.log(`[TBOT] : Authorized user '${userId}' is online`);
+			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
+			AccessAllowed = true;
+		} else {
+			console.log(`[TBOT] : Access for user[${userId}] was denied.`);
+			AccessAllowed = false;
+		};
+		return AccessAllowed;
+	};
 
 	function forceChangeIdleArr(ctx){
-		inputString = ctx.message.text.replace('/set_idle_array', '');
-
-		idleList = JSON.parse((inputString).split(","));
-		idleList = idleList.sort(function () { return .5 - Math.random(); });
-		SteamAPI.gamesPlayed(idleList, forceIdle);
-		core_data.timeFromShuffle = 0;
-		core_data.lastShuffleType = 'Forced (Idle array update)';
-
-		ctx.reply('Idle array was successfully force overridden');
-		console.log(`TBOT: Idle array was force overridden by user\nNew array: [${idleList}]`);
+		if(checkTGUser(ctx.message.chat.id)) {
+			inputString = ctx.message.text.replace('/set_idle_array', '');
+			
+			idleList = JSON.parse((inputString).split(","));
+			idleList = idleList.sort(function () { return .5 - Math.random(); });
+			SteamAPI.gamesPlayed(idleList, forceIdle);
+			core_data.timeFromShuffle = 0;
+			core_data.lastShuffleType = 'Forced (Idle array update)';
+	
+			ctx.reply('Idle array was successfully force overridden');
+			console.log(`[TBOT] : Idle array was force overridden by user\nNew array: [${idleList}]`);
+		} else {
+			console.log(`[TBOT]=>[SECURITY] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
+		};
 	};
 
 	function resetOverriddenIdleList(ctx){
@@ -101,7 +121,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		core_data.lastShuffleType = 'Forced (Reset idle list to env)';
 
 		ctx.reply('Idle array was reseted to process.env state');
-		console.log('TBOT: Idle array was reseted to process.env state');
+		console.log('[TBOT] : Idle array was reseted to process.env state');
 	}
 
 	function switchIdleStatus(ctx) {
@@ -116,12 +136,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		};
 		core_data.lastShuffleType = 'Forced (Idle switch)';
 		ctx.reply(`Idling status was changed to ${core_data.idlingProcessStatus}`);
-		console.log(`TBOT: Idling status was changed to ${core_data.idlingProcessStatus}`);
-	};
-
-	function sendFromUnauthToAdmin(ctx){
-		console.log(`TBOT: Received message from unauthorized user\n- ${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}`);
-		tg_bot.telegram.sendMessage(process.env.TBOT_ACCESSID, `-----\nReceived message from unauthorized user\n\n${ctx.message.from.username}[id:'${ctx.message.from.id}']: ${ctx.message.text}\n-----`);
+		console.log(`[TBOT] : Idling status was changed to ${core_data.idlingProcessStatus}`);
 	};
 
 	function set2FAkeyAndRelog(key_str) {
@@ -137,46 +152,28 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		SteamAPI.logOn(logOnDetails);
 	};
 
-	function checkTGUser(userId) {
-		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
-			console.log(`TBOT: Authorized user '${userId}' is online`);
-			core_data.tbot_userLogged = true;
-			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
-			
-			SteamAPI.on('friendMessage', function(){
-				console.log('TBOT: [STEAM] - You have a new chat message.');
-				tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
-			});
-			
-			//
-			tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS));
-			//
-			tg_bot.command('get_idle_array', (ctx) => ctx.reply(idleList));
-			//
-			tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx));
-			//
-			tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx));
-			//
-			tg_bot.command('info', (ctx) => ctx.reply(`
-			=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [${core_data.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====
-			`));
-			//
-			tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
-			//
-			tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text))
-			//
-			tg_bot.command('restart', () => (process.exit()));
-		} else {
-			//Send all messages from unauthorized users to log
-			console.log(`TBOT: Access for user[${userId}] was denied.`);
-			tg_bot.on('message', (ctx) => sendFromUnauthToAdmin(ctx));
-		};
-	};
 
-	tg_bot.start((ctx) => checkTGUser(ctx.from.id));
-	tg_bot.launch().then(console.log("Telegram control bot successfully connected and ready to work"));
+	/* * * */
+	SteamAPI.on('friendMessage', function(){
+		console.log('[TBOT]=>[STEAM] : You have a new chat message.');
+		tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
+	});
+	
+	tg_bot.command('get_env_idle_array', (ctx) => ctx.reply(process.env.STEAM_GAMEIDS));
+	tg_bot.command('get_idle_array', (ctx) => ctx.reply(idleList));
+	tg_bot.command('set_idle_array', (ctx) => forceChangeIdleArr(ctx));
+	tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx));
+	tg_bot.command('info', (ctx) => ctx.reply(`
+	=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [${core_data.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====
+	`));
+	tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
+	tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text))
+	tg_bot.command('restart', () => (process.exit()));
+	/* Init all bot commands */
+
+	tg_bot.launch().then(console.log("Telegram control bot is ready to work"));
 } else {
-	console.log("TBOT: Disabled by user, not initializing.");
+	console.log("[TBOT] : Disabled by user, not initializing.");
 };
 
 
