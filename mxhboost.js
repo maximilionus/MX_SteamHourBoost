@@ -84,20 +84,19 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	
 	function checkTGUser(userId) { // ctx.message.chat.id
 		let AccessAllowed = false;
-		if (userId == JSON.parse(process.env.TBOT_ACCESSID)) {
+		if (userId === JSON.parse(process.env.TBOT_ACCESSID)) {
 			console.log(`[TBOT] : Authorized user '${userId}' is online`);
 			tg_bot.telegram.sendMessage(userId, 'You are connected to MXSteamHourBooster control system. Welcome!');
 			AccessAllowed = true;
 		} else {
 			console.log(`[TBOT] : Access for user[${userId}] was denied.`);
-			AccessAllowed = false;
 		};
 		return AccessAllowed;
 	};
 
 	function printIdleArray(ctx) {
 		if (checkTGUser(ctx.message.chat.id)) {
-			ctx.reply(idleList)
+			ctx.reply(idleList);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/get_idle_array] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
@@ -143,9 +142,11 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	};
 
 	function printStatusInfo(ctx) {
-		ctx.reply(`
-	=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [${core_data.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====
-	`)
+		if(checkTGUser(ctx.message.chat.id)) {
+			ctx.reply(`=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [${core_data.idlingProcessStatus}]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====`)
+		} else {
+			console.log(`[TBOT]=>[SECURITY]>[/info] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
+		};
 	};
 
 	function switchIdleStatus(ctx) {
