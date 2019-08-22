@@ -67,7 +67,6 @@ SteamAPI.on('error', e => console.log(e));
 // Init telegram bot
 if (JSON.parse(process.env.TBOT_ENABLE)) {
 	var tg_bot;
-	var allowSteamMSGNotifications = false;
 	
 	/* * * * * * * * * * * * * * * * * */
 	const TBOT_UNAUTHWARNING = "Not whitelisted user request detected";
@@ -193,9 +192,12 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		};
 	};
 
+	var allowSteamMSGNotifications = false;
 	function switch_SteamMSGAllowNotifications(ctx) {
 		if (checkTGUser(ctx.message.chat.id)) {
 			allowSteamMSGNotifications ? (allowSteamMSGNotifications = true) : (allowSteamMSGNotifications = false);
+			console.log(`[TBOT]>[/snotif_switch] : Steam message notification system status: ${allowSteamMSGNotifications}`)
+			ctx.reply(`Steam message notification system status: ${allowSteamMSGNotifications}`);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/restart] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
