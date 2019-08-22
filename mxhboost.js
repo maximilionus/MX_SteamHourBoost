@@ -167,10 +167,10 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		};
 	};
 
-	function set2FAkeyAndRelog(key_str) {
+	function set2FAkeyAndRelog(ctx) {
 		if(checkTGUser(ctx.message.chat.id)) {
 			SteamAPI.logOff();
-			let key_str_final = key_str.replace('/set2fa', '');
+			let key_str_final = ctx.message.text.replace('/set2fa', '');
 			let logOnDetails = {
 				'accountName': process.env.STEAM_LOGIN,
 				'password': Buffer.from(process.env.STEAM_PASSWORD, 'base64').toString('ascii'),
@@ -205,7 +205,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	tg_bot.command('reset_idle_array', (ctx) => resetOverriddenIdleList(ctx));
 	tg_bot.command('info', (ctx) => printStatusInfo(ctx));
 	tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
-	tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx.message.text))
+	tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx))
 	tg_bot.command('restart', (ctx) => restartIdleBot(ctx));
 	/* Init all bot commands */
 
