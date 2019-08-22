@@ -67,6 +67,7 @@ SteamAPI.on('error', e => console.log(e));
 // Init telegram bot
 if (JSON.parse(process.env.TBOT_ENABLE)) {
 	var tg_bot;
+	var allowSteamMSGNotifications = false;
 	
 	/* * * * * * * * * * * * * * * * * */
 	const TBOT_UNAUTHWARNING = "Not whitelisted user request detected";
@@ -192,6 +193,14 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		};
 	};
 
+	function switch_SteamMSGAllowNotifications(ctx) {
+		if (checkTGUser(ctx.message.chat.id)) {
+			allowSteamMSGNotifications ? (allowSteamMSGNotifications = true) : (allowSteamMSGNotifications = false);
+		} else {
+			console.log(`[TBOT]=>[SECURITY]>[/restart] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
+		};
+	};
+
 	SteamAPI.on('friendMessage', function(){
 		console.log('[TBOT]=>[STEAM] : You have a new chat message.');
 		tg_bot.telegram.sendMessage(JSON.parse(process.env.TBOT_ACCESSID), "[STEAM] - You have a new chat message.");
@@ -206,6 +215,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	tg_bot.command('idle_switch', (ctx) => switchIdleStatus(ctx));
 	tg_bot.command('set2fa', (ctx) => set2FAkeyAndRelog(ctx))
 	tg_bot.command('restart', (ctx) => restartIdleBot(ctx));
+	tg_bot.command('snotif_switch', (ctx) => switch_SteamMSGAllowNotifications(ctx));
 	/* Init all bot commands */
 
 	tg_bot.launch().then(console.log("Telegram control bot is ready to work"));
