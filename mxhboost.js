@@ -178,6 +178,9 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			};
 			
 			SteamAPI.logOn(logOnDetails);
+			ctx.reply('2FA Key was successfully set and Steam Client recreated.');
+			core_data.timeFromShuffle = 0;
+			core_data.lastShuffleType = 'Forced (Set 2FA key with steam client relog)';
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/set2fa] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
