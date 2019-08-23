@@ -116,7 +116,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			core_data.timeFromShuffle = 0;
 			core_data.lastShuffleType = 'Forced (Idle array update)';
 	
-			ctx.reply('Idle array was successfully force overridden');
+			ctx.reply('*Idle array* was successfully force overridden', telegraf_markdown);
 			console.log(`[TBOT] : Idle array was force overridden by user\nNew array: [${idleList}]`);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/set_idle_array] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
@@ -130,7 +130,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			core_data.timeFromShuffle = 0;
 			core_data.lastShuffleType = 'Forced (Reset idle list to env)';
 
-			ctx.reply('Idle array was reseted to process.env state');
+			ctx.reply('Idle array was _reseted_ to `process.env` state', telegraf_markdown);
 			console.log('[TBOT] : Idle array was reseted to process.env state');
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/reset_idle_array] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
@@ -139,7 +139,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 	function printStatusInfo(ctx) {
 		if(checkTGUser(ctx.message.chat.id)) {
-			ctx.reply(`*[CURRENT STATUS REPORT]*\n=====\n*Last restart date* : ${core_data.restartDate}\n=====\n*Idling status* : [ ${core_data.idlingProcessStatus} ]\n=====\n*Steam MSG Notifications system status* : [ ${allowSteamMSGNotifications} ]\n=====\n*Time from script run* _(h/m/s)_ :\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\n*Time from last idle array shuffle* _(h/m/s)_ :\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n *Last shuffle type* : ${core_data.lastShuffleType}\n=====`, telegraf_markdown);
+			ctx.reply(`\u0060[CURRENT STATUS REPORT]\u0060\n=====\n*Last restart date* : \u0060${core_data.restartDate}\u0060\n=====\n*Idling status* : [ \u0060${core_data.idlingProcessStatus}\u0060 ]\n=====\n*Steam MSG Notifications system status* : [ \u0060${allowSteamMSGNotifications}\u0060 ]\n=====\n*Time from script run* _(h/m/s)_ :\n\u0060${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\u0060\n*Time from last idle array shuffle* _(h/m/s)_ :\n\u0060${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\u0060\n *Last shuffle type* : \u0060${core_data.lastShuffleType}\u0060\n=====`, telegraf_markdown);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/info] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
@@ -198,7 +198,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 		if (checkTGUser(ctx.message.chat.id)) {
 			allowSteamMSGNotifications ? (allowSteamMSGNotifications = false) : (allowSteamMSGNotifications = true);
 			console.log(`[TBOT]>[/snotif_switch] : Steam message notification system status: ${allowSteamMSGNotifications}`)
-			ctx.reply(`Steam message notification system status: ${allowSteamMSGNotifications}`);
+			ctx.reply(`Steam message notification system status: \u0060${allowSteamMSGNotifications}\u0060`, telegraf_markdown);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/restart] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
