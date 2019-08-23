@@ -1,5 +1,7 @@
 const SteamUser = require('steam-user');
 const Telegraf = require('telegraf');
+const telegraf_extra = require('telegraf/extra');
+const telegraf_markdown = telegraf_extra.markdown();
 const Dotenv = require('dotenv');
 const SocksAgent = require('socks5-https-client/lib/Agent');
 Dotenv.config();
@@ -84,11 +86,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	
 	function checkTGUser(userId) { // ctx.message.chat.id
 		let AccessAllowed = false;
-		if (userId === JSON.parse(process.env.TBOT_ACCESSID)) {
-			AccessAllowed = true;
-		} else {
-			console.log(`[TBOT] : Access for user[${userId}] was denied.`);
-		};
+		(userId === JSON.parse(process.env.TBOT_ACCESSID)) ? (AccessAllowed = true) : (AccessAllowed = false);
 		return AccessAllowed;
 	};
 
@@ -141,7 +139,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 	function printStatusInfo(ctx) {
 		if(checkTGUser(ctx.message.chat.id)) {
-			ctx.reply(`=====\nLast restart date: ${core_data.restartDate}\n=====\nIdling status: [ ${core_data.idlingProcessStatus} ]\n=====\nSteam MSG Notifications system status: [ ${allowSteamMSGNotifications} ]\n=====\nTime from script run (h/m/s):\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\nTime from last idle array shuffle (h/m/s):\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n- Last shuffle type: ${core_data.lastShuffleType}\n=====`)
+			ctx.reply(`*[CURRENT STATUS REPORT]*\n=====\n*Last restart date* : ${core_data.restartDate}\n=====\n*Idling status* : [ ${core_data.idlingProcessStatus} ]\n=====\n*Steam MSG Notifications system status* : [ ${allowSteamMSGNotifications} ]\n=====\n*Time from script run* _(h/m/s)_ :\n${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60}\n*Time from last idle array shuffle* _(h/m/s)_ :\n${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)}\n *Last shuffle type* : ${core_data.lastShuffleType}\n=====`, telegraf_markdown);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/info] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
