@@ -223,7 +223,10 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 	tg_bot.command('snotif_switch', (ctx) => switch_SteamMSGAllowNotifications(ctx));
 	/* Init all bot commands */
 
-	tg_bot.launch().then(console.log("Telegram control bot is ready to work"));
+	tg_bot.launch().then(function() {
+		console.log("Telegram control bot is ready to work");
+		tg_bot.telegram.sendMessage(process.env.TBOT_ACCESSID, "Telegram bot successfully connected and ready to work.");
+	});
 } else {
 	console.log("[TBOT] : Disabled by user, not initializing.");
 };
