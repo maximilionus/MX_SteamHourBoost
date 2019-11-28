@@ -157,7 +157,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 				SteamAPI.gamesPlayed(idleList, forceIdle);
 			};
 			core_data.lastShuffleType = 'Forced (Idle switch)';
-			ctx.reply(`Idling status was changed to ${core_data.idlingProcessStatus}`);
+			ctx.reply(`Idling status was changed to \u0060${core_data.idlingProcessStatus}\u0060`, telegraf_markdown);
 			console.log(`[TBOT] : Idling status was changed to ${core_data.idlingProcessStatus}`);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/idle_switch] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
