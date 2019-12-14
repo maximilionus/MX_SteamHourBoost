@@ -139,7 +139,21 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 
 	function printStatusInfo(ctx) {
 		if(checkTGUser(ctx.message.chat.id)) {
-			ctx.reply(`\u0060[CURRENT STATUS REPORT]\u0060\n=====\n▫️ *Last restart date* :\n\u0060[ ${core_data.restartDate} ]\u0060\n▫️ *Idling status* :\n\u0060[ ${core_data.idlingProcessStatus} ]\u0060\n▫️ *Steam MSG Notifications system status* :\n\u0060[ ${allowSteamMSGNotifications} ]\u0060\n=====\n▫️ *Time from script run* _(h/m/s)_ :\n\u0060[ ${Math.floor(core_data.timeFromStartup / 3600)}:${Math.floor(core_data.timeFromStartup % 3600 / 60)}:${core_data.timeFromStartup % 3600 % 60} ]\u0060\n▫️ *Time from last idle array shuffle* _(h/m/s)_ :\n\u0060[ ${Math.floor(core_data.timeFromShuffle / 3600)}:${Math.floor(core_data.timeFromShuffle % 3600 / 60)}:${Math.floor(core_data.timeFromShuffle % 3600 % 60)} ]\u0060\n▫️ *Last shuffle type* :\n\u0060[ ${core_data.lastShuffleType} ]\u0060\n=====`, telegraf_markdown);
+			let info_time_final = {
+				from_restart: {
+					days: Math.floor(core_data.timeFromStartup / 3600 / 24),
+					hours: Math.floor(core_data.timeFromStartup / 3600),
+					minutes: Math.floor(core_data.timeFromStartup % 3600 / 60),
+					seconds: core_data.timeFromStartup % 3600 % 60
+				},
+				from_idle_shuffle: {
+					days,
+					hours: Math.floor(core_data.timeFromShuffle / 3600),
+					minutes: Math.floor(core_data.timeFromShuffle % 3600 / 60),
+					seconds: Math.floor(core_data.timeFromShuffle % 3600 % 60)
+				}
+			};
+			ctx.reply(`\u0060[CURRENT STATUS REPORT]\u0060\n=====\n▫️ *Last restart date* :\n\u0060[ ${core_data.restartDate} ]\u0060\n▫️ *Idling status* :\n\u0060[ ${core_data.idlingProcessStatus} ]\u0060\n▫️ *Steam MSG Notifications system status* :\n\u0060[ ${allowSteamMSGNotifications} ]\u0060\n=====\n▫️ *Time from script run* _(h/m/s)_ :\n\u0060[ ${info_time_final.from_restart.hours}:${info_time_final.from_restart.minutes}:${info_time_final.from_restart.seconds} ]\u0060\n▫️ *Time from last idle array shuffle* _(h/m/s)_ :\n\u0060[ ${info_time_final.from_idle_shuffle.hours}:${info_time_final.from_idle_shuffle.minutes}:${info_time_final.from_idle_shuffle.seconds} ]\u0060\n▫️ *Last shuffle type* :\n\u0060[ ${core_data.lastShuffleType} ]\u0060\n=====`, telegraf_markdown);
 		} else {
 			console.log(`[TBOT]=>[SECURITY]>[/info] : ${TBOT_UNAUTHWARNING}. User: id[${ctx.message.chat.id}], name[${ctx.message.from.username}]`);
 		};
