@@ -48,7 +48,7 @@ const SteamAPI = new SteamUser();
 
 const logOnDetails = {
 	'accountName': process.env.STEAM_LOGIN,
-	'password': Buffer.from(process.env.STEAM_PASSWORD, 'base64').toString('ascii'),
+	'password': process.env.STEAM_PASSWORD,
 	'twoFactorCode': core_data.steam_AUTH_Code,
 	'dontRememberMachine': true
 };
@@ -184,7 +184,7 @@ if (JSON.parse(process.env.TBOT_ENABLE)) {
 			let key_str_final = ctx.message.text.replace('/set2fa', '');
 			let logOnDetails = {
 				'accountName': process.env.STEAM_LOGIN,
-				'password': Buffer.from(process.env.STEAM_PASSWORD, 'base64').toString('ascii'),
+				'password': process.env.STEAM_PASSWORD,
 				'twoFactorCode': key_str_final,
 				'dontRememberMachine': true
 			};

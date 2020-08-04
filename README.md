@@ -1,11 +1,11 @@
 ### MAXIMILI's Steam Hour Booster for Deploys
 |       | Var                |     Type      | Description                                                                                                      |
 | :---: | ------------------ | :-----------: | ---------------------------------------------------------------------------------------------------------------- |
-|       | STEAM_LOGIN        |     `str`     | Steam login                                                                                                      |
-|       | STEAM_PASSWORD     |     `str`     | Steam passwd                                                                                                     |
-|       | STEAM_2FA          |     `str`     | Steam 2FA code                                                                                                   |
+|       | STEAM_LOGIN        |     `str`     | Steam account login                                                                                              |
+|       | STEAM_PASSWORD     |     `str`     | Steam account password                                                                                           |
+|       | STEAM_2FA          |     `str`     | Steam 2FA code *(Optional)*                                                                                      |
 |       | STEAM_GAMEIDS      | [`int`,`int`] | Steam items for idle                                                                                             |
-|       | STEAM_FORCEIDLE    |    `bool`     | Force steam to kick user with different ip from game to start idle process                                       |
+|       | STEAM_FORCEIDLE    |    `bool`     | Force steam to kick user from different machine from game to start idle process                                  |
 |       | CORE_SHUFFLE_DELAY |     `int`     | Steam idle restart with STEAM_GAMEIDS shuffle procedure delay in ms                                              |
 |   ╔   | TBOT_ENABLE        |    `bool`     | Enable/Disable Telegram control bot                                                                              |
 |   ║   | TBOT_TOKEN         |     `str`     | Telegram bot token if enabled                                                                                    |
@@ -24,7 +24,7 @@ get_idle_array - Return array with current idling IDs
 get_env_idle_array - Return array values from process.env
 set_idle_array - Override current idle array with new values
 reset_idle_array - Reset overridden array to process.env value
-set2fa - Set key
+set2fa - Enter 2FA key
 restart - Halt current process and restart
-snotif_switch - Switch Steam msg notifications
+snotif_switch - Switch steam chat notifications
 ```
